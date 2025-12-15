@@ -1,0 +1,71 @@
+## 
+## Author: Gianna
+## Editor: Chris C (Convert Rmd to R to be sourced by flexboard script)
+
+## Cheese Animal Counts
+
+## Amount of cheeses made with different animal milk: Bar graph showing the number 
+## of cheeses produced by type of animal. Log base 10 is used to show the counts 
+## along the displayed x-axis. Moose, donkey and camel all have a count of 1 cheese 
+## type. All animal icons are from BioRender. Numbers at end of bar indicate total 
+## count of cheese type.
+
+library(tidytuesdayR)
+
+cheeses <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
+
+
+library(tidyverse)
+library(dplyr)
+
+#Data frame set up
+cheeses_count <- cheeses %>%
+  select(cheese, milk) %>%
+  group_by(milk) %>%
+  summarize(cheese = n(), .groups = 'drop')
+
+#Data frame separate out by animal, remove spaces 
+cheeses_indv <- cheeses %>%
+  select(cheese, milk) %>%
+  separate(milk, into = c("animal1", "animal2", "animal3", "animal4"), sep = ",", remove = FALSE) %>%
+  pivot_longer(cols = starts_with("animal"), names_to = "position", values_to = "Animal") %>%
+  filter(!is.na(Animal)) %>%
+  mutate(Animal_combined = str_replace(Animal, " ", "")) %>%
+  mutate(Animal_combined= ifelse(Animal_combined == "waterbuffalo", "water buffalo", Animal_combined)) %>%
+  group_by(Animal_combined) %>%
+  summarize(cheese = n(), .groups = 'drop') %>%
+  rename(animal = Animal_combined) 
+
+
+
+#Create animal image data frame from BioRender (saved png files in Animalpngs folder)
+Animal_Images <- data.frame(
+  animal = c("yak", "water buffalo", "sheep", "plant-based", "moose", "goat", "donkey", "cow", "camel", "buffalo"),
+  value = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+  image = c("Animalpngs/Yak.png", "Animalpngs/Waterbuffalo.png", "Animalpngs/Sheep.png","Animalpngs/Plant.png", "Animalpngs/Moose.png", "Animalpngs/Goat.png", "Animalpngs/Donkey.png", "Animalpngs/Cow.png","Animalpngs/Camel.png", "Animalpngs/Buffalo.png")
+)
+
+Animal_Cheese <- full_join(cheeses_indv, Animal_Images, by = "animal", keep = FALSE) %>%
+  arrange(desc(cheese))
+
+
+
+library(ggplot2)
+library(ggthemes)
+library(ggimage)
+library(plotly)
+library(scales)
+library(grid)
+
+Animal_Cheese = Animal_Cheese %>%
+  ggplot(aes(x = reorder(animal, cheese), y = log10(cheese))) + 
+  geom_col(color = "black", fill = "white") +
+  geom_text(aes(label = cheese), vjust = 0, nudge_y = 0.11) +
+  coord_flip() +
+  scale_y_continuous(limits = c(-0.5, 3.5)) +
+  geom_image(aes(image = image, y= -0.4), size = 0.09, by = "width", asp = 1.5, nudge_y = 0) +
+  labs(x = "Animal Milk", y = "Number of Cheese Types (log10(cheese counts))", title = "Amount of cheese made from different animals' milk") +
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 12),
+        axis.text.x.top = element_text(size = 15))
