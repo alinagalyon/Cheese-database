@@ -28,7 +28,7 @@ library(tibble)
 ```
 
 # Goal
-## A flavor-by-animal heatmap ordered by an OpenTree phylogeny. A phylogenetic tree of the primary milk sources (i.e., cow, goat, sheep, etc) was constructed using the ape and rotl packages. The individual cheese flavor notes from the milks of each animal was grouped into 7 broad flavor groups, and the phylogenetic tree of each animal was mapped to a heatmap of flavors with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=###)". 
+## A flavor-by-animal heatmap ordered by an OpenTree phylogeny. A phylogenetic tree of the primary milk sources (i.e., cow, goat, sheep, etc) was constructed using the ape and rotl packages. The individual cheese flavor notes from the milks of each animal was grouped into 7 broad flavor groups, and the phylogenetic tree of each animal was mapped to a heatmap of flavors with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=771)". 
 
 ```{r prep_animals}
 

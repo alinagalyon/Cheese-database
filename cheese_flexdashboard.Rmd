@@ -74,7 +74,7 @@ cheese_map
 
 ### Cheese Phylogeny {data-height="2000"}
 
-Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size:
+A flavor-by-animal heatmap ordered by an OpenTree phylogeny. A phylogenetic tree of the primary milk sources (i.e., cow, goat, sheep, etc) was constructed using the ape and rotl packages. The individual cheese flavor notes from the milks of each animal was grouped into 7 broad flavor groups, and the phylogenetic tree of each animal was mapped to a heatmap of flavors with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=771)". 
 
 ## Column 2 {data-height="2000"}
 
@@ -100,6 +100,7 @@ Bar graph showing the number of cheeses produced by type of animal. Log base 10 
 ```{r, include=FALSE}
 source("cheese_count_animal.R")
 ```
+
 ```{r}
 Animal_Cheese
 ```
