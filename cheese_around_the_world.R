@@ -10,6 +10,14 @@ library(cartogram)
 library(scales)
 library(viridis)
 library(htmltools)
+
+
+#DESCRIPTION
+# This map showcases cheese production across the globe, with color gradients indicating the number of cheese varieties produced in each country. Hover over a country to discover fast facts about the types of cheese made there. Be sure to check out the “Cheese Capitals”—the ten regions with the highest reported cheese diversity!
+
+
+
+
 #format the data. rename countries so cheese and rnaturalearth names align
 cheeses <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
 cheese_data <- cheeses %>%
@@ -55,7 +63,6 @@ cheese_borders <- cheese_borders %>%
 
 
 #adding in leaflet
-
 pal <- colorBin(
   palette = c("white", plasma(13)), 
   domain = cheese_borders$cheese_types,
@@ -81,3 +88,4 @@ cheese_map <- leaflet(data = cheese_borders) %>%
     opacity = 0.7
   ) %>%
   print()
+

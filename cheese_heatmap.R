@@ -1,19 +1,15 @@
----
-title: "251212_final_heatmap"
-author: "Alina"
-date: "2025-12-12"
-output: html_document
----
+## 
+## Author: Alina
+## Editor: Chris C (Convert Rmd to R to be sourced by flexboard script)
 
----
-title: "251202_heatmap"
-author: "Alina"
-date: "2025-12-02"
-output: html_document
----
+## Cheese Heatmap
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# Goal
+## Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra 
+## row annotations (avg fat, avg calcium) and tree tip labels, showing sample 
+## size: "cow (n=###)".
+
+
 # Core packages
 library(tidyverse)
 library(stringr)
@@ -25,12 +21,8 @@ library(rotl)
 library(ComplexHeatmap)
 library(circlize)
 library(tibble)
-```
-
-# Goal
-## A flavor-by-animal heatmap ordered by an OpenTree phylogeny. A phylogenetic tree of the primary milk sources (i.e., cow, goat, sheep, etc) was constructed using the ape and rotl packages. The individual cheese flavor notes from the milks of each animal was grouped into 7 broad flavor groups, and the phylogenetic tree of each animal was mapped to a heatmap of flavors with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=###)". 
-
-```{r prep_animals}
+library(tidyverse)
+library(readr)
 
 #Load data and Clean + define primary milk source
 # - drops rows with missing milk
@@ -46,10 +38,12 @@ cheeses_clean <- cheeses %>%
 # Check animals
 animals <- unique(cheeses_clean$primarymilk) #good
 
-```
 
+
+## ---------------------------------------------------
 ### 2) Build the phylogenetic tree (Open Tree of Life):
-```{r phylo_tree}
+## ---------------------------------------------------
+
 # Map common milk labels -> scientific names used by OpenTree
 name_map <- c(
   "cow"           = "Bos taurus",
@@ -99,12 +93,10 @@ tips_bare <- tree$tip.label
 plot(tree, cex = 1)
 
 
-```
-
-
+## ---------------------------------------------------
 ### 3) Expand flavor notes and build a flavor-by-animal matrix (with one filtering rule)
+## ---------------------------------------------------
 
-```{r build_flavor_matrix}
 library(tidyr)
 library(stringr)
 
@@ -148,9 +140,15 @@ flavor_mat_nonzero <- flavor_mat %>%
   filter(rowSums(across(-primarymilk)) > 0)
 
 flavor_mat_nonzero
-```
+
+
+
+
+## ---------------------------------------------------
 ## Cluster flavors into fewer categories:
-```{r flavor_cat}
+## ---------------------------------------------------
+
+
 unique(flavor_long$flavor) #46 unique flavor notes
 
 # Build a lookup table: flavor -> flavor_group
@@ -177,11 +175,11 @@ flavor_groups <- tibble(flavor = keep_flavors) %>%
 flavor_groups %>% count(flavor_group)
 
 
-```
 
-
+## ---------------------------------------------------
 ### 5) Align flavor matrix to tree + convert to percent:
-```{r align_and_percent}
+## ---------------------------------------------------
+
 # Use the nonzero matrix, and keep only animals in the tree, in tree order
 flavor_mat_ordered <- flavor_mat_nonzero %>%
   filter(primarymilk %in% tips_bare) %>%
@@ -207,26 +205,25 @@ flavor_heat <- flavor_heat[, colnames(flavor_heat) != "NA", drop = FALSE]
 
 
 
-```
 
-
+## ---------------------------------------------------
 ## 6) Compute avg fat + avg calcium per animal (row annotations)
+## ---------------------------------------------------
 
-```{r calculate avg fat and calcium}
 # Parses fat/calcium fields, handles ranges, and computes averages per primarymilk.
 
 cheeses_fat_calc <- cheeses %>%
   filter(!is.na(milk)) %>%
   mutate(
     primarymilk = str_trim(str_split_fixed(milk, ",", 2)[,1]),
-
+    
     # FAT: strip units/percent symbols; keep numeric or ranges
     fat_str = fat_content %>%
       str_to_lower() %>%
       str_replace_all("g\\s*/\\s*100g", "") %>%
       str_replace_all("%", "") %>%
       str_trim(),
-
+    
     # CALCIUM: strip common units; keep numeric or ranges
     cal_str = calcium_content %>%
       str_to_lower() %>%
@@ -269,10 +266,12 @@ row_anno <- rowAnnotation(
   col = list(AvgFat = fat_col_fun, AvgCalcium = cal_col_fun),
   annotation_name_side = "bottom"
 )
-```
 
+
+## ---------------------------------------------------
 ### 7) Add sample size `(n=...)` to tree tip labels
-```{r n_cheeses_label}
+## ---------------------------------------------------
+
 # Total number of cheeses per animal (regardless of flavor notes)
 n_by_animal <- cheeses_clean %>%
   count(primarymilk, name = "n_cheeses_total")
@@ -286,9 +285,6 @@ tips_display <- paste0(tips_bare, " (n=", tips_n, ")")
 tips_display
 
 
-```
-
-```{r row_annotation_def}
 library(ComplexHeatmap)
 
 # 1. Prepare data frame (meta_df should be correctly aligned)
@@ -302,11 +298,10 @@ row_anno <- rowAnnotation(
 )
 
 
-
-```
-
+## ---------------------------------------------------
 ### 8) Final heatmap (phylogenetic rows + grouped columns + annotations)
-```{r final_heatmmap}
+## ---------------------------------------------------
+
 # Order flavor_pct by tree tips (already aligned, but keep explicit)
 flavor_pct_ordered <- flavor_pct[tips_bare, , drop = FALSE]
 
@@ -365,29 +360,28 @@ top_anno <- HeatmapAnnotation(
   annotation_name_side = "left"
 )
 
-Heatmap(
+heatmap = Heatmap(
   flavor_pct_ordered,
   name = "% flavor notes",
   col  = col_fun,
-
+  
   # Rows: show phylogenetic dendrogram
   cluster_rows   = row_dend,
   row_order      = tips_bare,
   row_labels     = tips_display,
   row_names_side = "left",
-
+  
   # Columns: cluster within the groups (and split by group)
   cluster_columns = TRUE,
   column_split    = flavor_group_fac2,
   cluster_column_slices  = FALSE,
   top_annotation  = top_anno,
-
+  
   # Row annotation bars
   left_annotation = row_anno,
-
+  
   column_names_rot = 90,
   column_title = "Flavor-note groups"
 )
 
 
-```
