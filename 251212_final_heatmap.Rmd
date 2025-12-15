@@ -1,0 +1,394 @@
+---
+title: "251212_final_heatmap"
+author: "Alina"
+date: "2025-12-12"
+output: html_document
+---
+
+---
+title: "251202_heatmap"
+author: "Alina"
+date: "2025-12-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Core packages
+library(tidyverse)
+library(stringr)
+library(tidyr)
+
+# Phylogeny + heatmap packages
+library(ape)
+library(rotl)
+library(ComplexHeatmap)
+library(circlize)
+library(tibble)
+```
+
+# Goal
+## Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=###)".
+
+```{r prep_animals}
+library(tidyverse)
+
+#Load data and Clean + define primary milk source
+# - drops rows with missing milk
+# - takes first milk listed if multiple are comma-separated
+cheeses <- read_csv("cheeses.csv")
+cheeses_clean <- cheeses %>%
+  filter(!is.na(milk)) %>%
+  mutate(
+    primarymilk = str_trim(str_split_fixed(milk, ",", 2)[, 1])
+  )
+
+
+# Check animals
+animals <- unique(cheeses_clean$primarymilk) #good
+
+```
+
+### 2) Build the phylogenetic tree (Open Tree of Life):
+```{r phylo_tree}
+# Map common milk labels -> scientific names used by OpenTree
+name_map <- c(
+  "cow"           = "Bos taurus",
+  "sheep"         = "Ovis aries",
+  "goat"          = "Capra hircus",
+  "camel"         = "Camelus dromedarius",
+  "moose"         = "Alces alces",
+  "water buffalo" = "Bubalus bubalis",
+  "buffalo"       = "Bubalus bubalis",
+  "yak"           = "Bos grunniens"
+)
+
+# Keep only animals that you can translate to scientific names
+animals_in_map   <- animals[animals %in% names(name_map)]
+#want a plain character vector, not a character vector with names attached:
+animals_scientif <- unname(name_map[animals_in_map]) 
+
+# Match names against OpenTree taxonomy and extract ott_ids
+matches <- tnrs_match_names(animals_scientif, context_name = "Animals")
+ott_ids <- matches$ott_id[!is.na(matches$ott_id)]
+
+# Build induced subtree containing those ott_ids
+tree <- tol_induced_subtree(ott_ids)
+
+# Cleaning up OpenTree tip labels (include suffixes like "_ott####" and underscores)
+clean_tips <- tree$tip.label %>%
+  gsub("_ott.*", "", .) %>%      # remove ott suffixes
+  gsub("_", " ", .) %>%          # underscores -> spaces
+  trimws() %>%
+  sub("\\s*\\(.*\\)$", "", .)    # remove trailing "(...)" if present
+
+# Relabel scientific tips back to common animal names
+# lookup: names = scientific name, values = common name
+lookup <- setNames(animals_in_map, animals_scientif)
+tree$tip.label <- lookup[clean_tips]
+
+# Give the tree branch lengths (ComplexHeatmap needs something to draw a dendrogram)
+tree <- compute.brlen(tree, method = "Grafen", power = 1)
+
+# Convert phylo -> hclust -> dendrogram for ComplexHeatmap
+row_dend <- tree %>% as.hclust() %>% as.dendrogram()
+
+# Convenience: tip order from the tree
+tips_bare <- tree$tip.label
+
+# Sanity check plot
+plot(tree, cex = 1)
+
+
+```
+
+
+### 3) Expand flavor notes and build a flavor-by-animal matrix (with one filtering rule)
+
+```{r build_flavor_matrix}
+library(tidyr)
+library(stringr)
+
+# Long format- split comma-separated flavor strings into one row per flavor term
+flavor_long <- cheeses_clean %>%
+  filter(!is.na(flavor)) %>%
+  select(cheese, primarymilk, flavor) %>%
+  separate_rows(flavor, sep = ",") %>%
+  mutate(flavor = str_trim(str_to_lower(flavor)))
+
+# Count unique cheese-flavor occurrences per animal (prevents double counting a cheese listing same term twice)
+flavor_counts_raw <- flavor_long %>%
+  distinct(cheese, primarymilk, flavor) %>%
+  count(primarymilk, flavor, name = "n_cheeses")
+
+# Filter out globally rare flavors across *all* animals
+min_cheeses_per_flavor <- 15  # <-- adjustable threshold, I chose 15 bc it looks best for now
+keep_flavors <- flavor_counts_raw %>%
+  group_by(flavor) %>%
+  summarise(total_n = sum(n_cheeses), .groups = "drop") %>%
+  filter(total_n >= min_cheeses_per_flavor) %>%
+  pull(flavor)
+
+flavor_counts <- flavor_counts_raw %>%
+  filter(flavor %in% keep_flavors)
+
+# Ensure every animal appears even if it has 0 for all retained flavors
+all_animals <- cheeses_clean %>% distinct(primarymilk)
+
+flavor_counts_full <- all_animals %>%
+  left_join(flavor_counts, by = "primarymilk") %>%
+  mutate(n_cheeses = replace_na(n_cheeses, 0L))
+
+# Wide matrix: rows = animals, columns = flavor terms, values = # cheeses with that flavor
+flavor_mat <- flavor_counts_full %>%
+  pivot_wider(names_from = flavor, values_from = n_cheeses, values_fill = 0) %>%
+  arrange(primarymilk)
+
+# drop animals with no flavor data at all (all zeros), donkey dropped
+flavor_mat_nonzero <- flavor_mat %>%
+  filter(rowSums(across(-primarymilk)) > 0)
+
+flavor_mat_nonzero
+```
+## Cluster flavors into fewer categories:
+```{r flavor_cat}
+unique(flavor_long$flavor) #46 unique flavor notes
+
+# Build a lookup table: flavor -> flavor_group
+flavor_group_map <- function(flavor) {
+  case_when(
+    flavor %in% c("sweet", "caramel", "butterscotch", "burnt caramel") ~ "Sweet / Caramelized",
+    flavor %in% c("acidic", "tangy", "citrusy", "lemony", "sour", "tart") ~ "Bright / Acidic",
+    flavor %in% c("milky", "buttery", "creamy", "smooth", "mild",
+                  "mellow", "full-flavored", "subtle") ~ "Dairy / Rich",
+    flavor %in% c("savory", "umami", "meaty", "mushroomy", "garlicky") ~ "Savory / Umami",
+    flavor %in% c("earthy", "herbaceous", "grassy", "vegetal", "woody", "rustic") ~ "Earthy / Herbaceous",
+    flavor %in% c("sharp", "strong", "pronounced", "spicy",
+                  "piquant", "pungent", "bitter", "salty", "smokey") ~ "Intense / Pungent",
+    flavor %in% c("nutty", "yeasty", "licorice", "fruity", "floral") ~ "Aromatic / Nutty / Fermented",
+    flavor %in% c("crunchy") ~ "Texture",
+    TRUE ~ "Other"
+  )
+}
+
+# Make a per-flavor grouping table (only for flavors we kept)
+flavor_groups <- tibble(flavor = keep_flavors) %>%
+  mutate(flavor_group = flavor_group_map(flavor))
+
+flavor_groups %>% count(flavor_group)
+
+
+```
+
+
+### 5) Align flavor matrix to tree + convert to percent:
+```{r align_and_percent}
+# Use the nonzero matrix, and keep only animals in the tree, in tree order
+flavor_mat_ordered <- flavor_mat_nonzero %>%
+  filter(primarymilk %in% tips_bare) %>%
+  slice(match(tips_bare, primarymilk))
+
+# Convert to numeric matrix for ComplexHeatmap
+flavor_heat <- flavor_mat_ordered %>%
+  column_to_rownames("primarymilk") %>%
+  as.matrix()
+
+# Convert counts -> row-wise percent (percent of all flavor mentions for that animal)
+flavor_pct <- sweep(flavor_heat, 1, rowSums(flavor_heat, na.rm = TRUE), FUN = "/") * 100
+
+# Sanity check: matrix rows match tree tips
+stopifnot(all(rownames(flavor_pct) == tips_bare))
+
+# Create column split (vector) for heatmap based on flavor group
+flavor_group_fac <- flavor_groups$flavor_group[match(colnames(flavor_pct), flavor_groups$flavor)]
+flavor_group_fac <- factor(flavor_group_fac)
+
+flavor_heat <- flavor_heat[, !is.na(colnames(flavor_heat)), drop = FALSE]
+flavor_heat <- flavor_heat[, colnames(flavor_heat) != "NA", drop = FALSE]
+
+
+
+```
+
+
+## 6) Compute avg fat + avg calcium per animal (row annotations)
+
+```{r calculate avg fat and calcium}
+# Parses fat/calcium fields, handles ranges, and computes averages per primarymilk.
+
+cheeses_fat_calc <- cheeses %>%
+  filter(!is.na(milk)) %>%
+  mutate(
+    primarymilk = str_trim(str_split_fixed(milk, ",", 2)[,1]),
+
+    # FAT: strip units/percent symbols; keep numeric or ranges
+    fat_str = fat_content %>%
+      str_to_lower() %>%
+      str_replace_all("g\\s*/\\s*100g", "") %>%
+      str_replace_all("%", "") %>%
+      str_trim(),
+
+    # CALCIUM: strip common units; keep numeric or ranges
+    cal_str = calcium_content %>%
+      str_to_lower() %>%
+      str_replace_all("mg\\s*/\\s*g|mg\\s*/\\s*100g|%", "") %>%
+      str_trim()
+  ) %>%
+  separate(fat_str, into = c("fat_min", "fat_max"), sep = "-", fill = "right") %>%
+  mutate(
+    fat_min = as.numeric(fat_min),
+    fat_max = as.numeric(fat_max),
+    fat_pct = if_else(is.na(fat_max), fat_min, (fat_min + fat_max) / 2)
+  ) %>%
+  separate(cal_str, into = c("cal_min", "cal_max"), sep = "-", fill = "right") %>%
+  mutate(
+    cal_min = as.numeric(cal_min),
+    cal_max = as.numeric(cal_max),
+    cal_pct_raw = if_else(is.na(cal_max), cal_min, (cal_min + cal_max) / 2),
+    cal_pct = cal_pct_raw / 1000  # <-- your original conversion
+  )
+
+average_content_df <- cheeses_fat_calc %>%
+  group_by(primarymilk) %>%
+  summarise(
+    AvgFat     = mean(fat_pct, na.rm = TRUE),
+    AvgCalcium = mean(cal_pct, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Align meta to tree order (bare tips)
+meta_df <- tibble(primarymilk = tips_bare) %>%
+  left_join(average_content_df, by = "primarymilk") %>%
+  column_to_rownames("primarymilk")
+
+# Color scales for annotations
+fat_col_fun <- colorRamp2(c(0, max(meta_df$AvgFat, na.rm = TRUE)), c("white", "orange"))
+cal_col_fun <- colorRamp2(c(0, max(meta_df$AvgCalcium, na.rm = TRUE)), c("white", "cornflowerblue"))
+
+row_anno <- rowAnnotation(
+  df  = meta_df[, c("AvgFat", "AvgCalcium"), drop = FALSE],
+  col = list(AvgFat = fat_col_fun, AvgCalcium = cal_col_fun),
+  annotation_name_side = "bottom"
+)
+```
+
+### 7) Add sample size `(n=...)` to tree tip labels
+```{r n_cheeses_label}
+# Total number of cheeses per animal (regardless of flavor notes)
+n_by_animal <- cheeses_clean %>%
+  count(primarymilk, name = "n_cheeses_total")
+
+n_lookup <- setNames(n_by_animal$n_cheeses_total, n_by_animal$primarymilk)
+
+tips_n <- unname(n_lookup[tips_bare])
+tips_display <- paste0(tips_bare, " (n=", tips_n, ")")
+
+# Sanity check, should be no 'NA'
+tips_display
+
+
+```
+
+```{r row_annotation_def}
+library(ComplexHeatmap)
+
+# 1. Prepare data frame (meta_df should be correctly aligned)
+#set row annotation for avg fat and calcium
+meta_df_for_anno <- meta_df[tips_bare, c("AvgFat", "AvgCalcium"), drop = FALSE]
+
+row_anno <- rowAnnotation(
+  df = meta_df_for_anno,
+  col = list(AvgFat = fat_col_fun, AvgCalcium = cal_col_fun),
+  annotation_name_side = "bottom"
+)
+
+
+
+```
+
+### 8) Final heatmap (phylogenetic rows + grouped columns + annotations)
+```{r final_heatmmap}
+# Order flavor_pct by tree tips (already aligned, but keep explicit)
+flavor_pct_ordered <- flavor_pct[tips_bare, , drop = FALSE]
+
+# Drop pesky NA column
+flavor_pct_ordered <- flavor_pct_ordered[
+  , !is.na(colnames(flavor_pct_ordered)) &
+    colnames(flavor_pct_ordered) != "NA",
+  drop = FALSE
+]
+
+
+# Heatmap colors (percent scale)
+max_val <- max(flavor_pct_ordered, na.rm = TRUE)
+col_fun <- colorRamp2(c(0, max_val), c("white", "firebrick"))
+
+flavor_group_levels <- c(
+  "Sweet / Caramelized",
+  "Bright / Acidic",
+  "Dairy / Rich",
+  "Savory / Umami",
+  "Earthy / Herbaceous",
+  "Intense / Pungent",
+  "Aromatic / Nutty / Fermented")
+
+flavor_group_colors <- c(
+  "Sweet / Caramelized"           = "#CEAB44",
+  "Bright / Acidic"               = "#FEBD37",
+  "Dairy / Rich"                  = "#DABB9F",
+  "Savory / Umami"                = "#4E501A",
+  "Earthy / Herbaceous"           = "#ABC115",
+  "Intense / Pungent"             = "#CC160E",
+  "Aromatic / Nutty / Fermented"  = "#F75400")
+
+# convert to factor with levels in the desired order
+flavor_group_fac <- factor(flavor_group_fac, levels = flavor_group_levels)
+
+# Build a column-aligned flavor-group factor 
+flavor_group_fac2 <- setNames(flavor_group_fac, colnames(flavor_pct_ordered)) 
+
+# Better/safer: rebuild from a mapping table 
+# flavor_groups is a df with columns: flavor, flavor_group
+flavor_group_fac2 <- flavor_groups$flavor_group[match(colnames(flavor_pct_ordered), flavor_groups$flavor)]
+names(flavor_group_fac2) <- colnames(flavor_pct_ordered)
+
+# Force the desired legend/split order
+flavor_group_fac2 <- factor(flavor_group_fac2, levels = flavor_group_levels)
+
+#sanity check
+stopifnot(identical(names(flavor_group_fac2), colnames(flavor_pct_ordered)))
+
+
+# give those colors to the annotation
+top_anno <- HeatmapAnnotation(
+  FlavorGroup = flavor_group_fac2,
+  col = list(FlavorGroup = flavor_group_colors),
+  annotation_name_side = "left"
+)
+
+Heatmap(
+  flavor_pct_ordered,
+  name = "% flavor notes",
+  col  = col_fun,
+
+  # Rows: show phylogenetic dendrogram
+  cluster_rows   = row_dend,
+  row_order      = tips_bare,
+  row_labels     = tips_display,
+  row_names_side = "left",
+
+  # Columns: cluster within the groups (and split by group)
+  cluster_columns = TRUE,
+  column_split    = flavor_group_fac2,
+  cluster_column_slices  = FALSE,
+  top_annotation  = top_anno,
+
+  # Row annotation bars
+  left_annotation = row_anno,
+
+  column_names_rot = 90,
+  column_title = "Flavor-note groups"
+)
+
+
+```

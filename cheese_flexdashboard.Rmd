@@ -1,0 +1,209 @@
+---
+output:
+  flexdashboard::flex_dashboard: default
+  html_document: default
+  theme: 
+      version: 4
+      bootswatch: minty
+runtime: shiny
+---
+
+# Home
+
+---
+title: "Big Cheeses (ERHS535 F25)"
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+      - { title: "Test", href: "https://example.com/about", align: left }
+---
+
+```{r}
+library(flexdashboard)
+library(shiny)
+```
+
+## Column
+
+### Big Title Right Here
+
+Wow, do you love cheese? Yes? That means you're in the right place. Don't forget the crackers!
+
+##### Cheese Data Information and Location: 
+We are using the **cheese data** from [tidytuesday cheese data](https://github.com/rfordatascience/tidytuesday/tree/main/data/2024/2024-06-04) 
+The tidytuesday cheese data is located in the folder from data/2024 on 06-04-2024 which is linked above.
+The *cheese information* comes from [cheese.com](https://www.cheese.com/) which uses cheese characteristics to help consumers locate their ideal cheese and relevant vendors. 
+
+The cheese data lists a different cheese type in each row (under the "cheese" column) and includes the cheese.com website for this cheese, the milk used to make the cheese, the cheese production region and cheese characteristics such as fat and calcium content as well as flavor, color, aroma, rind and cheese family grouping characterization. There is different information included for different cheese types and so there are many "NA" values included.For a complete breakdown of the column names and tidydata data frame see the [tidytuesday cheese ReadMe](https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-06-04/readme.md) 
+
+##### Cheese Dashboard Uses: 
+In our cheese dashboard, we are showing:
+
+1. cheese production region in an interactive map 
+2. cheese flavor families in a heatmap of flavor and milk (animal-produced)
+3. number of cheese types by producing animal
+4. cheeses to try by characteristic (check out the drop down box!)
+
+Navigate to different tabs to check out our cheese info and data graphics!
+
+<img src="https://c.tenor.com/hN89U2X0PC4AAAAC/tenor.gif" width="400" height="300"/>
+
+# Cheese Stats
+<!------------------------------->
+
+Here are some charts about cheese. It's important to study cheese becasue it is interesting. It is interesting because we love cheese.
+
+## Column 1 {data-height="800"}
+
+### Chart 1 {data-height="800"}
+
+```{r, fig.width = 14, fig.height = 10}
+cheeses <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
+
+# cheeses <- read.csv('data/cheeses.csv')
+
+library(ggplot2)
+ggplot(data = cheeses) +
+  geom_bar(aes(x = milk)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text = element_text(size = 14)) +
+  labs(x = "Milk", y = "Number of Cheeses")
+```
+
+### Chart 2 {data-height="6400"}
+
+```{r, include=FALSE}
+source("251202_heatmap.R")
+
+```
+
+```{r}
+ht
+```
+
+### Chart 3 {data-height="800"}
+
+```{r}
+```
+
+## Column 2 {data-height="800"}
+
+### Chart 1 Description {data-height="800"}
+
+Some information about the chart
+
+### Chart 2 Description {data-height="6400"}
+
+Information about this chart
+
+### Chart 3 Desc {data-height="800"}
+
+Information about this chart
+
+# Cheese Finder
+
+<!------------------------------->
+
+<!-- ## Find your dream cheese (other than wensleydale, duh...) -->
+
+
+## Inputs {.sidebar data-width=250}
+
+```{r}
+# Drop down menus
+
+selectInput('selected_country', 'Country', unique(cheeses$country))
+
+selectInput('selected_milk', 'Milk', unique(cheeses$milk))
+
+selectInput('selected_rind', 'Rind', unique(cheeses$rind))
+
+# selectInput('selected_vegetarian', 'Vegetarian', unique(cheeses$vegetarian))
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Cheeses to try
+
+
+```{r}
+
+output$cheese_table <- DT::renderDT({
+
+df <- cheeses |>
+  dplyr::filter(
+    country == input$selected_country,
+    milk == input$selected_milk,
+    rind == input$selected_rind
+  ) |>
+  dplyr::select(cheese)
+
+DT::datatable(
+  df,
+  selection = "single",
+  rownames = FALSE,
+  options = list(dom = 't')
+  )
+})
+DT::DTOutput("cheese_table")
+
+# library(dplyr)
+# 
+# renderTable({
+#   df <- cheeses |>
+#     dplyr::filter(country == input$selected_country,
+#                   milk == input$selected_milk,
+#                   rind == input$selected_rind)
+#   
+#   df |> select(cheese)
+# 
+# })
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+```{r}
+
+output$cheese_details <- renderTable({
+  req(input$cheese_table_rows_selected)
+  
+  filtered <- cheeses |>
+    dplyr::filter(
+      country == input$selected_country,
+      milk == input$selected_milk,
+      rind == input$selected_rind
+    )
+  
+  row <- filtered[input$cheese_table_rows_selected, ]
+
+  # Convert to vertical key-value table
+  data.frame(
+    Field = names(row),
+    Value = as.character(t(row)),
+    stringsAsFactors = FALSE
+  )
+})
+
+tableOutput("cheese_details")
+
+# output$cheese_details <- renderTable({
+# req(input$cheese_table_rows_selected)
+# 
+# filtered <- cheeses |>
+# filter(
+# country == input$selected_country,
+# milk == input$selected_milk,
+# rind == input$selected_rind
+# )
+# 
+# filtered[input$cheese_table_rows_selected, ]
+# })
+# 
+# tableOutput("cheese_details")
+```
+
+
+
