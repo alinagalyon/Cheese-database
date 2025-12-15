@@ -51,39 +51,38 @@ Navigate to different tabs to check out our cheese info and data graphics!
 # Cheese Stats
 <!------------------------------->
 
-Here are some charts about cheese. It's important to study cheese becasue it is interesting. It is interesting because we love cheese.
+Here are some charts about cheese. It's important to study cheese because it is interesting. It is interesting because we love cheese.
 
 ## Column 1 {data-height="800"}
 
 ### Chart 1 {data-height="800"}
 
-```{r, fig.width = 14, fig.height = 10}
-cheeses <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
-
-# cheeses <- read.csv('data/cheeses.csv')
-
-library(ggplot2)
-ggplot(data = cheeses) +
-  geom_bar(aes(x = milk)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.text = element_text(size = 14)) +
-  labs(x = "Milk", y = "Number of Cheeses")
-```
-
-### Chart 2 {data-height="6400"}
-
 ```{r, include=FALSE}
-source("251202_heatmap.R")
-
+source("cheese_around_the_world.R")
 ```
 
 ```{r}
-ht
+cheese_map
+```
+
+### Chart 2 {data-height="800"}
+
+```{r, include=FALSE}
+source("cheese_heatmap.R")
+```
+
+```{r}
+heatmap
 ```
 
 ### Chart 3 {data-height="800"}
 
+```{r, include=FALSE}
+source("cheese_count_animal.R")
+```
+
 ```{r}
+Animal_Cheese
 ```
 
 ## Column 2 {data-height="800"}
@@ -92,13 +91,13 @@ ht
 
 Some information about the chart
 
-### Chart 2 Description {data-height="6400"}
+### Cheese Phylogeny {data-height="800"}
 
-Information about this chart
+Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size:
 
-### Chart 3 Desc {data-height="800"}
+### Amount of cheeses made with different animal milk: {data-height="800"}
 
-Information about this chart
+Bar graph showing the number of cheeses produced by type of animal. Log base 10 is used to show the counts along the displayed x-axis. Moose, donkey and camel all have a count of 1 cheese type. All animal icons are from BioRender. Numbers at end of bar indicate total count of cheese type.
 
 # Cheese Finder
 
