@@ -81,3 +81,4 @@ cheese_map <- leaflet(data = cheese_borders) %>%
     opacity = 0.7
   ) %>%
   print()
+

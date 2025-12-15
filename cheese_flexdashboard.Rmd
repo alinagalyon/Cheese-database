@@ -51,7 +51,7 @@ Navigate to different tabs to check out our cheese info and data graphics!
 # Cheese Stats
 <!------------------------------->
 
-Here are some charts about cheese. It's important to study cheese becasue it is interesting. It is interesting because we love cheese.
+Here are some charts about cheese. It's important to study cheese because it is interesting. It is interesting because we love cheese.
 
 ## Column 1 {data-height="800"}
 
@@ -73,12 +73,12 @@ ggplot(data = cheeses) +
 ### Chart 2 {data-height="6400"}
 
 ```{r, include=FALSE}
-source("251202_heatmap.R")
+source("cheese_heatmap.R")
 
 ```
 
 ```{r}
-ht
+heatmap
 ```
 
 ### Chart 3 {data-height="800"}
