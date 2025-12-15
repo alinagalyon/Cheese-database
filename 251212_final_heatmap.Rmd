@@ -28,14 +28,14 @@ library(tibble)
 ```
 
 # Goal
-## Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=###)".
+## A flavor-by-animal heatmap ordered by an OpenTree phylogeny. A phylogenetic tree of the primary milk sources (i.e., cow, goat, sheep, etc) was constructed using the ape and rotl packages. The individual cheese flavor notes from the milks of each animal was grouped into 7 broad flavor groups, and the phylogenetic tree of each animal was mapped to a heatmap of flavors with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=###)". 
 
 ```{r prep_animals}
 
 #Load data and Clean + define primary milk source
 # - drops rows with missing milk
 # - takes first milk listed if multiple are comma-separated
-cheeses <- read_csv("/data/cheeses.csv")
+cheeses <- read_csv("data/cheeses.csv")
 cheeses_clean <- cheeses %>%
   filter(!is.na(milk)) %>%
   mutate(
