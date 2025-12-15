@@ -31,12 +31,11 @@ library(tibble)
 ## Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=###)".
 
 ```{r prep_animals}
-library(tidyverse)
 
 #Load data and Clean + define primary milk source
 # - drops rows with missing milk
 # - takes first milk listed if multiple are comma-separated
-cheeses <- read_csv("cheeses.csv")
+cheeses <- read_csv("/data/cheeses.csv")
 cheeses_clean <- cheeses %>%
   filter(!is.na(milk)) %>%
   mutate(
