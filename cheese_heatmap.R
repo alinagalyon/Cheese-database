@@ -360,28 +360,42 @@ top_anno <- HeatmapAnnotation(
   annotation_name_side = "left"
 )
 
-heatmap = Heatmap(
+h <- Heatmap(
   flavor_pct_ordered,
   name = "% flavor notes",
   col  = col_fun,
+  width = unit(13, "cm"),
   
   # Rows: show phylogenetic dendrogram
   cluster_rows   = row_dend,
   row_order      = tips_bare,
   row_labels     = tips_display,
   row_names_side = "left",
+  row_dend_width = unit(2, "cm"),
+  row_names_max_width = unit(4, "cm"),
+  row_names_gp = grid::gpar(fontsize = 9),
   
   # Columns: cluster within the groups (and split by group)
   cluster_columns = TRUE,
   column_split    = flavor_group_fac2,
   cluster_column_slices  = FALSE,
   top_annotation  = top_anno,
+  column_names_gp = grid::gpar(fontsize = 8),
+  column_names_rot = 90,
   
   # Row annotation bars
   left_annotation = row_anno,
   
-  column_names_rot = 90,
-  column_title = "Flavor-note groups"
-)
+  column_title = "Flavor-note groups",
+  heatmap_legend_param = list(
+    title = "% flavor notes",
+    title_gp = grid::gpar(fontsize = 8),
+    labels_gp = grid::gpar(fontsize = 8),
+    legend_height = unit(3, "cm"),
+    legend_width = unit(3, "cm")
+  )
+) |>
+  
+  draw( heatmap_legend_side = "right", annotation_legend_side = "right")
 
-
+h

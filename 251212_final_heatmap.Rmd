@@ -399,9 +399,9 @@ h <- Heatmap(
     legend_height = unit(3, "cm"),
     legend_width = unit(3, "cm")
   )
-)
+) |>
 
-draw(h, heatmap_legend_side = "right", annotation_legend_side = "right")
+draw( heatmap_legend_side = "right", annotation_legend_side = "right")
 
-
+h
 ```

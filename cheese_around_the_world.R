@@ -60,11 +60,25 @@ cheese_borders <- cheese_borders %>%
   mutate(cheese_types = replace_na(cheese_types, 0)) %>%
   st_transform(crs = 4326)
 
-
+cheese_pal <- c(
+  "#FEBD37",  # 1  young cheddar (bright yellow)
+  "#F2B43C",  # 2
+  "#E4A843",  # 3
+  "#D19A4C",  # 4
+  "#B88B57",  # 5
+  "#9E7C5F",  # 6
+  "#7F6664",  # 7 transition toward chestnut
+  "#59454C",  # 8 chestnut (midpoint)
+  "#6B3F44",  # 9
+  "#7D383B",  # 10
+  "#8F3232",  # 11
+  "#A12B29",  # 12
+  "#8B1E1E"   # 13 dark bell pepper (high)
+)
 
 #adding in leaflet
 pal <- colorBin(
-  palette = c("white", plasma(13)), 
+  palette = c("white", cheese_pal), 
   domain = cheese_borders$cheese_types,
   bins = c(0, 1, 4, 7, 11, 16, 26, 41, 61, 91, 151, 201, 251, 320)
 )
@@ -77,7 +91,7 @@ cheese_map <- leaflet(data = cheese_borders) %>%
     weight = 0.5,
     label = ~lapply(paste0(sovereignt, "<br/>Cheese Types: ", cheese_types), HTML)) %>%
   addLegend(
-    colors = c("white", plasma(13)),
+    colors = c("white", cheese_pal),
     position = "bottomright",
     values = cheese_borders$cheese_types,
     title = "World Cheese Production<br/> # Varieties",
