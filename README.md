@@ -13,6 +13,7 @@ pallete()
 ```
 
 ### Notes:
+We had to delete and remake our GitHub repo because of a project duplication error. There were 17 commits on the old repo before we re-made it.
 
 * Some inspiration from other projects
   * Cheese colors example chart: https://karaman.is/blog/2024/6/tidytuesday-202423
