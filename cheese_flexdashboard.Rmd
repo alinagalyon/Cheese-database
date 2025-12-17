@@ -1,26 +1,52 @@
 ---
+title: "Big Cheeses (ERHS535 F25)"
 output:
-  flexdashboard::flex_dashboard: default
-  html_document: default
-  theme: 
-      version: 4
-      bootswatch: minty
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    navbar:
+      - title: "Github Repo"
+        href: "https://github.com/alinagalyon/Cheese-database"
+        target: "_blank"
+        align: left
+theme:
+  version: 4
+  bootswatch: minty
+css: styles.css
 runtime: shiny
 ---
 
+<!-- --- -->
+<!-- title: "Big Cheeses (ERHS535 F25)" -->
+<!-- output: -->
+<!--   flexdashboard::flex_dashboard: -->
+<!--     orientation: columns -->
+<!--     vertical_layout: fill -->
+<!--     navbar: -->
+<!--       - { title: "Github Repo", href: "https://github.com/alinagalyon/Cheese-database", align: left } -->
+<!-- theme: -->
+<!--   version: 4 -->
+<!--   bootswatch: minty -->
+<!-- css: styles.css -->
+<!-- runtime: shiny -->
+
+<!-- # output: -->
+<!-- #   flexdashboard::flex_dashboard: default -->
+<!-- #   html_document: default -->
+<!-- #   theme:  -->
+<!-- #       version: 4 -->
+<!-- #       bootswatch: minty -->
+<!-- # runtime: shiny -->
+<!-- --- -->
+
 # Home
 
----
-title: "Big Cheeses (ERHS535 F25)"
-output: 
-  flexdashboard::flex_dashboard:
-    navbar:
-      - { title: "Test", href: "https://example.com/about", align: left }
----
 
 ```{r}
 library(flexdashboard)
 library(shiny)
+palette(c("#CEAB44", "#FEBD37", "#DABB9F", "#4E501A", "#ABC115", "#CC160E", "#F75400", "#59454C", "#F2F3EF", "#0A0E15"))
+# "#1f4f4f" "#2c7a7b" "#319795" "#2c7a7b" "#edf7f5" "#e6f4f1" "#cce7e1""#1f4f4f" "#2c7a7b"
 ```
 
 ## Column
@@ -69,26 +95,28 @@ cheese_map
 # Cheese Phylogeny
 <!------------------------------->
 
+<!-- ## Column 1 {data-height="2000"} -->
 
 <!-- ### Cheese Phylogeny {data-height="2000"} -->
 
-### Cheese Phylogeny {data-height="2000"}
+### Cheese Phylogeny {data-height="500"}
 
-Build a flavor-by-animal heatmap ordered by an OpenTree phylogeny, with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size:
+A flavor-by-animal heatmap ordered by an OpenTree phylogeny. A phylogenetic tree of the primary milk sources (i.e., cow, goat, sheep, etc) was constructed using the ape and rotl packages. The individual cheese flavor notes from the milks of each animal was grouped into 7 broad flavor groups, and the phylogenetic tree of each animal was mapped to a heatmap of flavors with extra row annotations (avg fat, avg calcium) and tree tip labels, showing sample size: "cow (n=771)". 
 
-## Column 2 {data-height="2000"}
+<!-- ## Column 2 {data-height="2000"} -->
 
+### Chart {data-height="2000"}
 ```{r, include=FALSE}
 source("cheese_heatmap.R")
 ```
 
-```{r}
-heatmap
+```{r, fig.width = 11, fig.height = 4}
+h
 ```
 
 
 
-# Who makes your cheese?
+# Where does cheese come from?
 <!------------------------------->
 
 ### Amount of cheeses made with different animal milk: {data-height="800"}
@@ -100,6 +128,7 @@ Bar graph showing the number of cheeses produced by type of animal. Log base 10 
 ```{r, include=FALSE}
 source("cheese_count_animal.R")
 ```
+
 ```{r}
 Animal_Cheese
 ```

@@ -1,0 +1,112 @@
+/* ============================
+   Global background
+   ============================ */
+
+body {
+  background-color: #CEAB44;   /* dark cheddar */
+}
+
+
+/* ============================
+   Section (tab) background
+   ============================ */
+
+.section.level1 {
+  background-color: #FEBD37;  /* young cheddar */
+  padding-top: 20px;
+}
+
+
+/* ============================
+   Navbar styling
+   ============================ */
+
+.navbar {
+  background-color: #CEAB44;   /* dark cheddar */
+  border-color: #2c7a7b;
+}
+
+/* Navbar title + links */
+.navbar a,
+.navbar-brand {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Hover state */
+.navbar a:hover {
+  color: #d1fae5 !important;
+}
+
+
+/* ============================
+   Headers
+   ============================ */
+
+/* Page title */
+h1 {
+  color: #59454C;   /* chestnut */
+  font-weight: 700;
+}
+
+/* Section headers */
+h2 {
+  color: #4E501A; /* Mould */
+  font-weight: 600;
+}
+
+/* Subsection headers */
+h3 {
+  color: #59454C; /* chestnut */
+  font-weight: 600;
+}
+
+/* Small headers */
+h4, h5 {
+  color: #59454C; /* chestnut */
+}
+
+
+/* ============================
+   Chart / card styling
+   ============================ */
+
+.chart-wrapper {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.chart-title {
+  color: #59454C; /* chestnut */
+  font-weight: 600;
+}
+
+
+/* ============================
+   Sidebar (Shiny inputs)
+   ============================ */
+
+.sidebar {
+  background-color: #F2F3EF /* ash-white */
+  border-right: 1px solid #F75400; /* tangerine */
+}
+
+.sidebar h2,
+.sidebar h3 {
+  color: #59454C; /* chestnut */
+}
+
+
+/* ============================
+   Tables (DT)
+   ============================ */
+
+table.dataTable thead {
+  background-color: #CC160E; /* bell pepper */
+  color: #ffffff;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: #F2F3EF; /* ash-white */
+}
