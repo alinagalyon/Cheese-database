@@ -276,12 +276,7 @@ filtered_cheeses <- reactive({
       country == input$selected_country,
       milk == input$selected_milk,
       rind == input$selected_rind
-      ) #|>
-    # # rename columns so that they look nicer
-    # dplyr::rename_with(~ stringr::str_to_title(.x)) |>
-    # dplyr::rename(`Fat Content` = Fat_content,
-    #               `Calcium Content` = Calcium_content,
-    #               `Alternative Spellings` = Alt_spellings)
+      )
 })
 ```
 
