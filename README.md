@@ -7,10 +7,10 @@ Group Members: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin
 ## How to run this website
 
 1. Clone repository
-2. Open $$Cheese-database.Rproj$$
-3. Open $$cheese_flexdashboard.Rmd$$
-4. Hit $$Run Document$$ to generate flexdashboard
-5. In the flexdashboard, click $$Open in Browser$$ for full interactability
+2. Open ```Cheese-database.Rproj```
+3. Open ```cheese_flexdashboard.Rmd```
+4. Click ```Run Document``` to generate the flexdashboard
+5. In the flexdashboard, click ```Open in Browser``` for full interactability
 
 
 
