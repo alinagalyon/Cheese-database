@@ -13,6 +13,7 @@ Group Members: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin
 5. In the flexdashboard, click ```Open in Browser``` for full interactability
 
 
+[Click here](https://github.com/alinagalyon/Cheese-database/blob/main/Final_Cheese_Presentation.pdf) to see our final presentation.
 
 
 ## Notes for group
