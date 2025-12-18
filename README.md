@@ -1,7 +1,20 @@
 # ERHS_final_project
 
+Group Members: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin Choi
+
 <img src="https://c.tenor.com/hN89U2X0PC4AAAAC/tenor.gif" width="400" height="400" />
 
+## How to run this website
+
+1. Clone repository
+2. Open $$Cheese-database.Rproj$$
+3. Open $$cheese_flexdashboard.Rmd$$
+4. Hit $$Run Document$$ to generate flexdashboard
+5. In the flexdashboard, click $$Open in Browser$$ for full interactability
+
+
+
+## Notes for group
 
 ### Colour Pallete:
 
