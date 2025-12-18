@@ -110,3 +110,43 @@ table.dataTable thead {
 table.dataTable tbody tr:hover {
   background-color: #F2F3EF; /* ash-white */
 }
+
+
+
+/* ============================
+   Footer
+   ============================ */
+
+   .flexdashboard-footer {
+     position: fixed;
+     bottom: 0;
+     left: 0;
+     width: 100%;
+     height: 400px;
+     background-color: transparent;
+     pointer-events: none;
+     z-index: 10000;
+   }
+
+   .flexdashboard-footer img {
+     height: 60px;
+     margin-left: 10px;
+   }
+
+/* Fixed footer with running mouse gif */
+/*.flexdashboard-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: transparent;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.flexdashboard-footer img {
+  height: 50px;
+  margin-left: 10px;
+}
+*/

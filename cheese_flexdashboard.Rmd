@@ -368,6 +368,12 @@ tableOutput("cheese_details")
 
 <!-- <div class="flexdashboard-footer"> -->
 <!--   <img src="https://i.pinimg.com/originals/53/c6/3e/53c63e16bea013e34932ea38d61cf843.gif" -->
+<!--        alt="Running mouse" -->
+<!--        style="height:400px;"> -->
+<!-- </div> -->
+
+<!-- <div class="flexdashboard-footer"> -->
+<!--   <img src="https://i.pinimg.com/originals/53/c6/3e/53c63e16bea013e34932ea38d61cf843.gif" -->
 <!--        alt="Running mouse"> -->
 <!-- </div> -->
 
