@@ -4,7 +4,7 @@ Group Members: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin
 
 <img src="https://c.tenor.com/hN89U2X0PC4AAAAC/tenor.gif" width="400" height="400" />
 
-## How to run this website
+## How to run the flexdashboard
 
 1. Clone repository
 2. Open ```Cheese-database.Rproj```
