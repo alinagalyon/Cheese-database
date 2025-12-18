@@ -27,7 +27,7 @@ library(readr)
 #Load data and Clean + define primary milk source
 # - drops rows with missing milk
 # - takes first milk listed if multiple are comma-separated
-cheeses <- read_csv("data/cheeses.csv")
+cheeses <- readr::read_csv("data/cheeses.csv")
 cheeses_clean <- cheeses %>%
   filter(!is.na(milk)) %>%
   mutate(

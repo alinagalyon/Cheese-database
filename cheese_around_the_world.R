@@ -18,7 +18,7 @@ library(htmltools)
 
 
 #format the data. rename countries so cheese and rnaturalearth names align
-cheeses <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
+cheeses <- readr::read_csv("data/cheeses.csv")
 cheese_data <- cheeses %>%
   separate_rows(country, sep = ", ") %>%
   separate_rows(country, sep = " and ")

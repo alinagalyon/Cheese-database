@@ -10,9 +10,7 @@
 ## type. All animal icons are from BioRender. Numbers at end of bar indicate total 
 ## count of cheese type.
 
-library(tidytuesdayR)
-
-cheeses <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
+cheeses <- readr::read_csv('data/cheeses.csv')
 
 
 library(tidyverse)

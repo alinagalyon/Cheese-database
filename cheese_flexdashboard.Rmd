@@ -1,5 +1,5 @@
 ---
-title: "Big Cheeses (ERHS535 F25)"
+title: "The Cheese Project (ERHS535 F25)"
 output:
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -16,44 +16,76 @@ css: styles.css
 runtime: shiny
 ---
 
-<!-- --- -->
-<!-- title: "Big Cheeses (ERHS535 F25)" -->
-<!-- output: -->
-<!--   flexdashboard::flex_dashboard: -->
-<!--     orientation: columns -->
-<!--     vertical_layout: fill -->
-<!--     navbar: -->
-<!--       - { title: "Github Repo", href: "https://github.com/alinagalyon/Cheese-database", align: left } -->
-<!-- theme: -->
-<!--   version: 4 -->
-<!--   bootswatch: minty -->
-<!-- css: styles.css -->
-<!-- runtime: shiny -->
-
-<!-- # output: -->
-<!-- #   flexdashboard::flex_dashboard: default -->
-<!-- #   html_document: default -->
-<!-- #   theme:  -->
-<!-- #       version: 4 -->
-<!-- #       bootswatch: minty -->
-<!-- # runtime: shiny -->
-<!-- --- -->
 
 # Home
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+## Install/load packages required
+load_or_install <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, dependencies = TRUE, repos = "https://cloud.r-project.org")
+  }
+  library(pkg, character.only = TRUE)
+}
+
+pkgs <- c("dplyr", 
+          "tidyr", 
+          "DT", 
+          "shiny", 
+          "flexdashboard",
+          "tidyverse",
+          "stringr",
+          "tidyr",
+          "ape",
+          "rotl",
+          "ComplexHeatmap",
+          "circlize",
+          "tibble",
+          "tidyverse",
+          "readr",
+          "leaflet",
+          "leaflet.extras",
+          "sf",
+          "knitr",
+          "rnaturalearth",
+          "tigris",
+          "ggthemes",
+          "cartogram",
+          "scales",
+          "viridis",
+          "htmltools",
+          "ggplot2",
+          "ggimage",
+          "plotly",
+          "scales",
+          "grid",
+          "tidyverse",
+          "dplyr")
+
+invisible(lapply(pkgs, load_or_install))
+
+
+```
 
 
 ```{r}
 library(flexdashboard)
 library(shiny)
 palette(c("#CEAB44", "#FEBD37", "#DABB9F", "#4E501A", "#ABC115", "#CC160E", "#F75400", "#59454C", "#F2F3EF", "#0A0E15"))
-# "#1f4f4f" "#2c7a7b" "#319795" "#2c7a7b" "#edf7f5" "#e6f4f1" "#cce7e1""#1f4f4f" "#2c7a7b"
 ```
 
 ## Column
 
-### Big Title Right Here
+### The Cheese Project
 
-Wow, do you love cheese? Yes? That means you're in the right place. Don't forget the crackers!
+
+Wow, do you love cheese? 
+
+Yes? 
+
+That means you're in the right place. Don't forget the crackers!
 
 ##### Cheese Data Information and Location: 
 We are using the **cheese data** from [tidytuesday cheese data](https://github.com/rfordatascience/tidytuesday/tree/main/data/2024/2024-06-04) 
@@ -72,14 +104,18 @@ In our cheese dashboard, we are showing:
 
 Navigate to different tabs to check out our cheese info and data graphics!
 
+
+From: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin Choi
+
 <img src="https://c.tenor.com/hN89U2X0PC4AAAAC/tenor.gif" width="400" height="300"/>
 
+
 # Cheeses Around the World
-<!------------------------------->
 
-Cheese around the world description
+### Cheese around the world description {data-height="500"}
 
-<!-- ## Column 1 {data-height="800"} -->
+This map showcases cheese production across the globe, with color gradients indicating the number of cheese varieties produced in each country. Hover over a country to discover fast facts about the types of cheese made there!
+
 
 ### Chart 1 {data-height="2000"}
 
@@ -93,11 +129,7 @@ cheese_map
 
 
 # Cheese Phylogeny
-<!------------------------------->
 
-<!-- ## Column 1 {data-height="2000"} -->
-
-<!-- ### Cheese Phylogeny {data-height="2000"} -->
 
 ### Cheese Phylogeny {data-height="500"}
 
@@ -117,7 +149,8 @@ h
 
 
 # Where does cheese come from?
-<!------------------------------->
+
+## Column 1 {data-height="800"}
 
 ### Amount of cheeses made with different animal milk: {data-height="800"}
 
@@ -136,27 +169,127 @@ Animal_Cheese
 
 
 
+# Discover A New Cheese
 
-# Cheese Finder
-
-<!------------------------------->
-
-<!-- ## Find your dream cheese (other than wensleydale, duh...) -->
-
-
-## Inputs {.sidebar data-width=250}
 
 ```{r}
-# Drop down menus
-
-selectInput('selected_country', 'Country', unique(cheeses$country))
-
-selectInput('selected_milk', 'Milk', unique(cheeses$milk))
-
-selectInput('selected_rind', 'Rind', unique(cheeses$rind))
-
-# selectInput('selected_vegetarian', 'Vegetarian', unique(cheeses$vegetarian))
+cheeses_finder = cheeses |>
+  dplyr::mutate(
+    milk = tidyr::replace_na(milk, "Not-Reported"),
+    rind = tidyr::replace_na(rind, "Not-Reported")#,
+    # region = tidyr::replace_na(region, "Not-Reported"),
+    # type = tidyr::replace_na(type, "Not-Reported"),
+    # fat_content = tidyr::replace_na(fat_content, "Not-Reported")
+    
+  ) |>
+  dplyr::select(-`...1`)
 ```
+
+## Inputs {.sidebar data-width=250}
+```{r}
+selectInput(
+  "selected_country",
+  "Country",
+  choices = sort(unique(cheeses_finder$country))
+)
+
+# selectInput(
+#   "selected_region",
+#   "Region",
+#   choices = NULL
+# )
+
+selectInput(
+  "selected_milk",
+  "Milk",
+  choices = NULL
+)
+
+selectInput(
+  "selected_rind",
+  "Rind",
+  choices = NULL
+)
+
+# selectInput(
+#   "selected_type",
+#   "Type",
+#   choices = NULL
+# )
+
+
+```
+
+```{r}
+# Update milk choices after country selection
+observeEvent(input$selected_country, {
+  
+  available_milk <- cheeses_finder |>
+    dplyr::filter(country == input$selected_country) |>
+    dplyr::pull(milk) |>
+    unique() |>
+    sort()
+  
+  updateSelectInput(
+    session,
+    "selected_milk",
+    choices = available_milk,
+    selected = available_milk[1]
+  )
+})
+
+# Update rind choices after country OR milk selection
+observeEvent(
+  c(input$selected_country, input$selected_milk),
+  {
+    available_rind <- cheeses_finder |>
+      dplyr::filter(
+        country == input$selected_country,
+        milk == input$selected_milk
+      ) |>
+      dplyr::pull(rind) |>
+      unique() |>
+      sort()
+    
+    updateSelectInput(
+      session,
+      "selected_rind",
+      choices = available_rind,
+      selected = available_rind[1]
+    )
+  }
+)
+
+```
+
+```{r}
+## Registers what the columns record
+filtered_cheeses <- reactive({
+  req(
+    input$selected_country,
+    input$selected_milk,
+    input$selected_rind
+)
+  cheeses_finder |>
+    dplyr::filter(
+      country == input$selected_country,
+      milk == input$selected_milk,
+      rind == input$selected_rind
+      ) |>
+    # rename columns so that they look nicer
+    dplyr::rename_with(~ stringr::str_to_title(.x)) |>
+    dplyr::rename(`Fat Content` = Fat_content,
+                  `Calcium Content` = Calcium_content,
+                  `Alternative Spellings` = Alt_spellings)
+})
+```
+
+Discover a new cheese by selecting from drop-down options above.
+
+Click on the cheese names to find out more about them!
+
+
+
 
 Column
 -----------------------------------------------------------------------
@@ -165,37 +298,21 @@ Column
 
 
 ```{r}
-
+## List of cheeses that fit the filter conditions (clickable)
 output$cheese_table <- DT::renderDT({
-
-df <- cheeses |>
-  dplyr::filter(
-    country == input$selected_country,
-    milk == input$selected_milk,
-    rind == input$selected_rind
-  ) |>
-  dplyr::select(cheese)
-
-DT::datatable(
-  df,
-  selection = "single",
-  rownames = FALSE,
-  options = list(dom = 't')
-  )
+  df <- filtered_cheeses() |>
+    dplyr::select(cheese)
+  DT::datatable(
+    df,
+    selection = "single",
+    rownames = FALSE,
+    options = list(dom = "t")
+    )
 })
+
 DT::DTOutput("cheese_table")
 
-# library(dplyr)
-# 
-# renderTable({
-#   df <- cheeses |>
-#     dplyr::filter(country == input$selected_country,
-#                   milk == input$selected_milk,
-#                   rind == input$selected_rind)
-#   
-#   df |> select(cheese)
-# 
-# })
+
 ```
 
 
@@ -203,44 +320,59 @@ Column
 -----------------------------------------------------------------------
 
 ```{r}
-
+## Tabel output with working URL
 output$cheese_details <- renderTable({
   req(input$cheese_table_rows_selected)
-  
-  filtered <- cheeses |>
-    dplyr::filter(
-      country == input$selected_country,
-      milk == input$selected_milk,
-      rind == input$selected_rind
-    )
-  
-  row <- filtered[input$cheese_table_rows_selected, ]
 
-  # Convert to vertical key-value table
-  data.frame(
+  row <- filtered_cheeses()[input$cheese_table_rows_selected, ]
+
+  details <- data.frame(
     Field = names(row),
     Value = as.character(t(row)),
     stringsAsFactors = FALSE
   )
-})
+
+  # Turn URL into clickable link that opens in new tab
+  details$Value[details$Field == "url"] <-
+    sprintf(
+      '<a href="%s" target="_blank">%s</a>',
+      details$Value[details$Field == "url"],
+      details$Value[details$Field == "url"]
+    )
+
+  details
+}, sanitize.text.function = identity)
 
 tableOutput("cheese_details")
 
+
+# ## Simple output
 # output$cheese_details <- renderTable({
-# req(input$cheese_table_rows_selected)
+#   req(input$cheese_table_rows_selected)
+#   row <- filtered_cheeses()[input$cheese_table_rows_selected, ]
 # 
-# filtered <- cheeses |>
-# filter(
-# country == input$selected_country,
-# milk == input$selected_milk,
-# rind == input$selected_rind
-# )
+#   data.frame(
+#     Field = names(row),
+#     Value = as.character(t(row)),
+#     stringsAsFactors = FALSE
+#     )
+#   })
 # 
-# filtered[input$cheese_table_rows_selected, ]
-# })
 # 
 # tableOutput("cheese_details")
+
 ```
 
+
+<div class="flexdashboard-footer">
+  <img src="https://i.pinimg.com/originals/53/c6/3e/53c63e16bea013e34932ea38d61cf843.gif"
+       alt="Running mouse"
+       style="height:400px;">
+</div>
+
+<!-- <div class="flexdashboard-footer"> -->
+<!--   <img src="https://i.pinimg.com/originals/53/c6/3e/53c63e16bea013e34932ea38d61cf843.gif" -->
+<!--        alt="Running mouse"> -->
+<!-- </div> -->
 
 
