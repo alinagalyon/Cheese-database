@@ -13,7 +13,7 @@ library(htmltools)
 
 
 #DESCRIPTION
-# This map showcases cheese production across the globe, with color gradients indicating the number of cheese varieties produced in each country. Hover over a country to discover fast facts about the types of cheese made there. Be sure to check out the “Cheese Capitals”—the ten regions with the highest reported cheese diversity!
+# This map showcases cheese production across the globe, with color gradients indicating the number of cheese varieties produced in each country. Hover over a country to discover fast facts about the types of cheese made there!
 
 
 
