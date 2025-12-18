@@ -17,7 +17,6 @@ library(htmltools)
 
 
 
-
 #format the data. rename countries so cheese and rnaturalearth names align
 cheeses <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-06-04/cheeses.csv')
 cheese_data <- cheeses %>%
@@ -60,6 +59,34 @@ cheese_borders <- cheese_borders %>%
   mutate(cheese_types = replace_na(cheese_types, 0)) %>%
   st_transform(crs = 4326)
 
+#label items
+common_animal <- cheese_data %>%
+  separate_rows(milk, sep = ", ") %>%
+  group_by(country, milk) %>%
+  summarise(
+    animal_producer = n()
+  ) %>%
+  ungroup() %>%
+  group_by(country) %>%
+  filter(animal_producer == max(animal_producer))
+
+
+top_company <- cheese_data %>%
+  group_by(country, producers) %>%
+  summarise(
+    n = n()
+  ) %>%
+  ungroup() %>%
+  group_by(country) %>%
+  filter(n == max(n)) %>%
+  ungroup() %>%
+  mutate(
+    producers = if_else(is.na(producers), "Not Reported", producers)
+  )
+
+
+
+#create color palette
 cheese_pal <- c(
   "#FEBD37",  # 1  young cheddar (bright yellow)
   "#F2B43C",  # 2
@@ -76,20 +103,26 @@ cheese_pal <- c(
   "#8B1E1E"   # 13 dark bell pepper (high)
 )
 
-#adding in leaflet
+
 pal <- colorBin(
   palette = c("white", cheese_pal), 
   domain = cheese_borders$cheese_types,
   bins = c(0, 1, 4, 7, 11, 16, 26, 41, 61, 91, 151, 201, 251, 320)
 )
 
-cheese_map <- leaflet(data = cheese_borders) %>%
+
+
+#print the plot
+cheese_map <- leaflet(data = cheese_borders, 
+                      options = leafletOptions(minZoom = 1.45)) %>%
   addPolygons(
     fillColor = ~pal(cheese_types),
     fillOpacity = 0.7,
     color = "black",
     weight = 0.5,
-    label = ~lapply(paste0(sovereignt, "<br/>Cheese Types: ", cheese_types), HTML)) %>%
+    label = ~lapply(
+      paste0(
+        sovereignt, "<br/>Cheese Types Reported: ", cheese_types, "<br/>Favored Milk Source: ", common_animal$milk, "<br/>Largest Producer: ", top_company$producers), HTML)) %>%
   addLegend(
     colors = c("white", cheese_pal),
     position = "bottomright",
