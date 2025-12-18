@@ -105,7 +105,8 @@ In our cheese dashboard, we are showing:
 Navigate to different tabs to check out our cheese info and data graphics!
 
 
-From: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin Choi
+Group Members: Gianna Zinnen, Alina Galyon, Danielle Samson, Christopher Tsz Hin Choi
+
 
 <img src="https://c.tenor.com/hN89U2X0PC4AAAAC/tenor.gif" width="400" height="300"/>
 
@@ -275,12 +276,12 @@ filtered_cheeses <- reactive({
       country == input$selected_country,
       milk == input$selected_milk,
       rind == input$selected_rind
-      ) |>
-    # rename columns so that they look nicer
-    dplyr::rename_with(~ stringr::str_to_title(.x)) |>
-    dplyr::rename(`Fat Content` = Fat_content,
-                  `Calcium Content` = Calcium_content,
-                  `Alternative Spellings` = Alt_spellings)
+      ) #|>
+    # # rename columns so that they look nicer
+    # dplyr::rename_with(~ stringr::str_to_title(.x)) |>
+    # dplyr::rename(`Fat Content` = Fat_content,
+    #               `Calcium Content` = Calcium_content,
+    #               `Alternative Spellings` = Alt_spellings)
 })
 ```
 
